@@ -1,0 +1,25 @@
+server:
+  port: 8080
+
+spring:
+  h2:
+    console:
+      enabled: true
+  datasource:
+    url: jdbc:h2:mem://localhost/~/ohs
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: sa
+  jpa:
+    hibernate:
+      ddl-auto: update  # option type: create, create-drop, update, validate, none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.SQLServerDialect
+        show_sql: true
+        format_sql: true
+        use_sql_comments: true
+
+aes:
+  key: 1MXH14UcdcYaXngTE3Sw00u6YsbZ2mBR
+  alg: AES/CBC/PKCS5Padding
