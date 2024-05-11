@@ -1,5 +1,6 @@
 package com.paymentPractice.payment.model;
 
+import com.paymentPractice.payment.entity.YesOrNo;
 import lombok.Getter;
 import lombok.Setter;
 

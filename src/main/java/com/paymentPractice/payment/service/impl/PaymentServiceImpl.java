@@ -41,27 +41,26 @@ public class PaymentServiceImpl implements PaymentService {
         // 결제 유효성 체크
         validationCheckService.paymentValidationCheck(paymentSO);
 
-        // 카드정보 암호화
-        String encryptedCardInformation = cardInformationConversionService.getEncryptedCardInformation(paymentSO);
+        PaymentVO paymentVO = new PaymentVO(paymentSO);
 
-        // 부가가치세 설정
-        CalculatedVat calculatedVat = getCalculatedVat(paymentSO.getVat(), paymentSO.getAmount());
+        // 카드정보 암호화
+        cardInformationConversionService.getEncryptedCardInformation(paymentVO);
 
         // 데이터 저장
         PaymentEntity paymentEntity = PaymentEntity.builder()
-                .userId(paymentSO.getUserId() == null ? "tempUserId" : paymentSO.getUserId())
-                .paymentStatus(PaymentStatus.SUCCESS) // 결제 상태
-                .cardInformation(encryptedCardInformation) // 카드 정보(암호화)
-                .installmentMonths(paymentSO.getInstallmentMonths()) // 할부 개월수
+                .userId(paymentVO.getUserId())
+                .paymentStatus(PaymentStatus.SUCCESS)
+                .cardInformation(paymentVO.getEncryptedCardInformation())
+                .installmentMonths(paymentVO.getInstallmentMonths())
                 .build();
         paymentEntity.setPaymentInsertData();
         paymentRepository.save(paymentEntity);
         AmountEntity amountEntity = AmountEntity.builder()
-                .amount(paymentSO.getAmount()) // 결제 금액
+                .amount(paymentVO.getAmount())
                 .paymentEntity(paymentEntity)
-                .amountType(AmountType.PAYMENT) // 결제금액 구분
-                .vat(calculatedVat.getVat()) // 부가가치세
-                .vatDefaultYn(calculatedVat.getVatDefaultYn()) // 기본부가가치세여부
+                .amountType(AmountType.PAYMENT)
+                .vat(paymentVO.getCalculatedVat())
+                .vatDefaultYn(paymentVO.getVatDefaultYn())
                 .build();
         amountEntity.setAmountInsertData();
         amountRepository.save(amountEntity);
@@ -69,19 +68,19 @@ public class PaymentServiceImpl implements PaymentService {
         // 전달할 String data 헤더, 데이터 객체 생성
         CommonHeaderVO header = CommonHeaderVO.builder()
                 .dataLength(getHeaderAndDataLength())
-                .dataDivision(String.valueOf(AmountType.PAYMENT)) // 데이터 구분
-                .managementNumber(amountEntity.getAmountId()) // 관리번호
+                .dataDivision(String.valueOf(AmountType.PAYMENT))
+                .managementNumber(amountEntity.getAmountId())
                 .build();
         DataSenderVO sender = DataSenderVO.builder()
-                .cardNumber(paymentSO.getCardNumber())
-                .installmentMonths(paymentSO.getInstallmentMonths()) // 할부 개월수
-                .expirationPeriod(paymentSO.getExpirationPeriod()) // 카드 유효기간
-                .cvc(Integer.parseInt(paymentSO.getCvc()))
-                .amount(paymentSO.getAmount()) // 결제금액
-                .vat(calculatedVat.getVat()) // 부가가치세
-                .originalManagementNumber("") // 원거래 관리번호
-                .encryptedCardInformation(encryptedCardInformation) // 암호화된 카드정보
-                .spareField(paymentEntity.getUserId()) // 예비필드(사용자 id)
+                .cardNumber(paymentVO.getCardNumber())
+                .installmentMonths(paymentVO.getInstallmentMonths())
+                .expirationPeriod(paymentVO.getExpirationPeriod())
+                .cvc(Integer.parseInt(paymentVO.getCvc()))
+                .amount(paymentVO.getAmount())
+                .vat(paymentVO.getCalculatedVat())
+                .originalManagementNumber("")
+                .encryptedCardInformation(paymentVO.getEncryptedCardInformation())
+                .spareField(paymentEntity.getUserId())
                 .build();
 
         // String data 생성 및 전송
@@ -107,11 +106,11 @@ public class PaymentServiceImpl implements PaymentService {
 
         // 금액 데이터 저장
         AmountEntity cancelAmount = AmountEntity.builder()
-                .amount(restAmountAndVat.getAmount()) // 결제금액
+                .amount(restAmountAndVat.getAmount())
                 .paymentEntity(paymentEntity)
-                .amountType(AmountType.CANCEL) // 결제금액 구분
-                .vat(restAmountAndVat.getVat()) // 부가가치세
-                .vatDefaultYn(YesOrNo.N) // 기본부가가치세여부
+                .amountType(AmountType.CANCEL)
+                .vat(restAmountAndVat.getVat())
+                .vatDefaultYn(YesOrNo.N)
                 .build();
         cancelAmount.setAmountInsertData();
         amountRepository.save(cancelAmount);
@@ -127,19 +126,19 @@ public class PaymentServiceImpl implements PaymentService {
         // 전달할 String data 헤더, 데이터 객체 생성
         CommonHeaderVO header = CommonHeaderVO.builder()
                 .dataLength(getHeaderAndDataLength())
-                .dataDivision(String.valueOf(AmountType.CANCEL)) // 데이터 구분
-                .managementNumber(amountEntity.getAmountId()) // 관리번호
+                .dataDivision(String.valueOf(AmountType.CANCEL))
+                .managementNumber(amountEntity.getAmountId())
                 .build();
         DataSenderVO sender = DataSenderVO.builder()
                 .cardNumber(cardInformation.getCardNumber())
-                .installmentMonths(paymentEntity.getInstallmentMonths()) // 할부 개월수
-                .expirationPeriod(cardInformation.getExpirationPeriod()) // 카드 유효 기간
+                .installmentMonths(paymentEntity.getInstallmentMonths())
+                .expirationPeriod(cardInformation.getExpirationPeriod())
                 .cvc(Integer.parseInt(cardInformation.getCvc()))
-                .amount(restAmountAndVat.getAmount()) // 결제금액
-                .vat(restAmountAndVat.getVat()) // 부가가치세
-                .originalManagementNumber(getFirstPaymentAmountId(paymentEntity)) // 원거래 관리번호(최초결제 ID)
-                .encryptedCardInformation(paymentEntity.getCardInformation()) // 암호화된 카드정보
-                .spareField(paymentEntity.getUserId()) // 예비필드(사용자 id)
+                .amount(restAmountAndVat.getAmount())
+                .vat(restAmountAndVat.getVat())
+                .originalManagementNumber(getFirstPaymentAmountId(paymentEntity))
+                .encryptedCardInformation(paymentEntity.getCardInformation())
+                .spareField(paymentEntity.getUserId())
                 .build();
 
         // String data 생성 및 전송
@@ -192,21 +191,21 @@ public class PaymentServiceImpl implements PaymentService {
         partialCancellationAvailableCheck(partialCancellationSO, restAmountAndVat.getAmount(), restAmountAndVat.getVat());
 
         // 부가가치세 설정
-        CalculatedVat calculatedVat = getCalculatedVat(partialCancellationSO.getVat(), partialCancellationSO.getAmount());
+        PartialCancellationVO partialCancellationVO = new PartialCancellationVO(partialCancellationSO);
 
         // 금액 데이터 저장
         AmountEntity cancelAmount = AmountEntity.builder()
-                .amount(partialCancellationSO.getAmount()) // 결제금액
+                .amount(partialCancellationVO.getAmount())
                 .paymentEntity(paymentEntity)
-                .amountType(AmountType.CANCEL) // 결제금액 구분(PAYMENT, CANCEL)
-                .vat(calculatedVat.getVat()) // 부가가치세
-                .vatDefaultYn(calculatedVat.getVatDefaultYn()) // 기본부가가치세여부
+                .amountType(AmountType.CANCEL)
+                .vat(partialCancellationVO.getVat())
+                .vatDefaultYn(partialCancellationVO.getVatDefaultYn())
                 .build();
         cancelAmount.setAmountInsertData();
         amountRepository.save(cancelAmount);
 
         // 결제상태, 할부개월수 데이터 저장
-        if(restAmountAndVat.getAmount() == partialCancellationSO.getAmount()) {
+        if(restAmountAndVat.getAmount() == partialCancellationVO.getAmount()) {
             paymentEntity.setPaymentStatus(PaymentStatus.CANCELLATION);
             paymentEntity.setInstallmentMonths(0);
         } else {
@@ -220,19 +219,19 @@ public class PaymentServiceImpl implements PaymentService {
         // 전달할 String data 헤더, 데이터 객체 생성
         CommonHeaderVO header = CommonHeaderVO.builder()
                 .dataLength(getHeaderAndDataLength())
-                .dataDivision(String.valueOf(AmountType.CANCEL)) // 데이터 구분
-                .managementNumber(amountEntity.getAmountId()) // 관리번호
+                .dataDivision(String.valueOf(AmountType.CANCEL))
+                .managementNumber(amountEntity.getAmountId())
                 .build();
         DataSenderVO sender = DataSenderVO.builder()
-                .cardNumber(cardInformation.getCardNumber()) // 카드번호
-                .installmentMonths(paymentEntity.getInstallmentMonths()) // 할부 개월수
-                .expirationPeriod(cardInformation.getExpirationPeriod()) // 카드 유효 기간
-                .cvc(Integer.parseInt(cardInformation.getCvc())) // cvc
-                .amount(restAmountAndVat.getAmount()) // 결제금액
-                .vat(restAmountAndVat.getVat()) // 부가가치세
-                .originalManagementNumber(getFirstPaymentAmountId(paymentEntity)) // 원거래 관리번호(최초결제 id)
-                .encryptedCardInformation(paymentEntity.getCardInformation()) // 암호화된 카드정보
-                .spareField(paymentEntity.getUserId()) // 예비필드(사용자 id)
+                .cardNumber(cardInformation.getCardNumber())
+                .installmentMonths(paymentEntity.getInstallmentMonths())
+                .expirationPeriod(cardInformation.getExpirationPeriod())
+                .cvc(Integer.parseInt(cardInformation.getCvc()))
+                .amount(restAmountAndVat.getAmount())
+                .vat(restAmountAndVat.getVat())
+                .originalManagementNumber(getFirstPaymentAmountId(paymentEntity))
+                .encryptedCardInformation(paymentEntity.getCardInformation())
+                .spareField(paymentEntity.getUserId())
                 .build();
 
         // String data 생성 및 전송
@@ -241,24 +240,6 @@ public class PaymentServiceImpl implements PaymentService {
         return PaymentResultVO.builder()
                 .amountId(cancelAmount.getAmountId())
                 .stringData(stringData).build();
-    }
-
-    // 부가가치세 설정
-    private static CalculatedVat getCalculatedVat(Integer vatData, int amount) {
-        int vat = 0;
-        YesOrNo vatDefaultYn = null;
-        // 부가가치세를 null로 받아 /11 을 적용받는 경우 
-        if (vatData == null) {
-            vat = (int) Math.round((double) amount / 11.0);
-            vatDefaultYn = YesOrNo.Y;
-        } else { // 부가가치세를 설정한 경우
-            vat = vatData;
-            vatDefaultYn = YesOrNo.N;
-        }
-        return CalculatedVat.builder()
-                .vat(vat)
-                .vatDefaultYn(vatDefaultYn)
-                .build();
     }
 
     // String data 생성 및 전송
@@ -278,7 +259,6 @@ public class PaymentServiceImpl implements PaymentService {
     private AmountEntity getAmountEntityById(String amountId) {
         AmountEntity amountEntity = amountRepository.findById(amountId)
                 .orElseThrow(() -> {
-                    // (400) 잘못된 id입니다.
                     throw new CustomException(ErrorCode.WRONG_AMOUNT_ID);
                 });
         return amountEntity;
@@ -289,7 +269,6 @@ public class PaymentServiceImpl implements PaymentService {
         PaymentEntity paymentEntity = amountEntity.getPaymentEntity();
         // 이미 취소된 결제 건인지 확인
         if (paymentEntity.getPaymentStatus() == PaymentStatus.CANCELLATION) {
-            // (400) 이미 취소처리된 결제입니다.
             throw new CustomException(ErrorCode.ALREADY_CANCELLED_PAYMENT);
         }
         return paymentEntity;
@@ -314,20 +293,17 @@ public class PaymentServiceImpl implements PaymentService {
     private static void partialCancellationAvailableCheck(PartialCancellationSO partialCancellationSO, int restAmount, int restVat) {
         // 취소 금액이 잔여금액보다 큰 경우
         if (restAmount < partialCancellationSO.getAmount()) {
-            // (400) 취소 금액이 잔여 금액을 초과했습니다.
             throw new CustomException(ErrorCode.EXCEED_REST_AMOUNT);
         }
         // 취소 부가가치세가 잔여 부가가치세보다 큰 경우
         if (partialCancellationSO.getVat() != null
                 && restVat < partialCancellationSO.getVat()) {
-            // (400) 취소 부가가치세가 잔여 부가가치세를 초과했습니다.
             throw new CustomException(ErrorCode.EXCEED_REST_VAT);
         }
         // 잔여 부가가치세가 남는 경우
         if (restAmount == partialCancellationSO.getAmount()
                 && partialCancellationSO.getVat() != null
                 && restVat - partialCancellationSO.getVat() > 0) {
-            // (400) 잔여 부가가치세가 존재합니다.
             throw new CustomException(ErrorCode.EXIST_REST_VAT);
         }
     }
@@ -357,7 +333,6 @@ public class PaymentServiceImpl implements PaymentService {
         for (Field field : CommonHeaderVO.class.getDeclaredFields()) {
             // 필드에 적용된 어노테이션 정보 가져와서 반환
             StringLength annotation = field.getAnnotation(StringLength.class);
-            // dataLength 길이는 계산에서 제외
             if (annotation != null && !field.getName().equals("dataLength")) {
                 totalLength += annotation.length();
             }

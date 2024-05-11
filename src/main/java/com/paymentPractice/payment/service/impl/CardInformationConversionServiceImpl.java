@@ -4,6 +4,7 @@ import com.paymentPractice.common.service.TwoWayEncryptionService;
 import com.paymentPractice.payment.entity.PaymentEntity;
 import com.paymentPractice.payment.model.CardInformationVO;
 import com.paymentPractice.payment.model.PaymentSO;
+import com.paymentPractice.payment.model.PaymentVO;
 import com.paymentPractice.payment.service.CardInformationConversionService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,17 +15,16 @@ public class CardInformationConversionServiceImpl implements CardInformationConv
     private final TwoWayEncryptionService twoWayEncryptionService;
 
     @Override
-    public String getEncryptedCardInformation(PaymentSO paymentSO) {
+    public void getEncryptedCardInformation(PaymentVO paymentVO) {
         StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append(paymentSO.getCardNumber());
+        stringBuffer.append(paymentVO.getCardNumber());
         stringBuffer.append("/");
-        stringBuffer.append(paymentSO.getExpirationPeriod());
+        stringBuffer.append(paymentVO.getExpirationPeriod());
         stringBuffer.append("/");
-        stringBuffer.append(paymentSO.getCvc());
+        stringBuffer.append(paymentVO.getCvc());
 
         String cardInformation = stringBuffer.toString();
-        String encryptedCardInformation = twoWayEncryptionService.encrypt(cardInformation);
-        return encryptedCardInformation;
+        paymentVO.setEncryptedCardInformation(twoWayEncryptionService.encrypt(cardInformation));
     }
 
     @Override
