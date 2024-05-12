@@ -3,7 +3,6 @@ package com.paymentPractice.payment.service.impl;
 import com.paymentPractice.common.aspect.MethodLog;
 import com.paymentPractice.common.exception.CustomException;
 import com.paymentPractice.common.model.ErrorCode;
-import com.paymentPractice.common.service.TwoWayEncryptionService;
 import com.paymentPractice.payment.entity.*;
 import com.paymentPractice.payment.model.*;
 import com.paymentPractice.payment.repository.AmountRepository;
@@ -11,18 +10,10 @@ import com.paymentPractice.payment.repository.PaymentRepository;
 import com.paymentPractice.payment.service.CardApiService;
 import com.paymentPractice.payment.service.CardInformationConversionService;
 import com.paymentPractice.payment.service.PaymentService;
-import com.paymentPractice.payment.service.ValidationCheckService;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.lang.reflect.Field;
-import java.time.LocalDate;
-import java.util.List;
 
 @Slf4j
 @Service
