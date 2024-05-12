@@ -31,7 +31,6 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentRepository paymentRepository;
     private final AmountRepository amountRepository;
     private final CardApiService cardApiService;
-    private final ValidationCheckService validationCheckService;
     private final CardInformationConversionService cardInformationConversionService;
 
     @Override
@@ -39,7 +38,7 @@ public class PaymentServiceImpl implements PaymentService {
     @MethodLog(description = "결제 메서드")
     public PaymentResultVO payment(PaymentSO paymentSO) {
         // 결제 유효성 체크
-        validationCheckService.paymentValidationCheck(paymentSO);
+        paymentSO.paymentValidationCheck();
 
         PaymentVO paymentVO = new PaymentVO(paymentSO);
 
@@ -173,7 +172,7 @@ public class PaymentServiceImpl implements PaymentService {
     @MethodLog(description = "결제 부분취소 메서드")
     public PaymentResultVO partialCancellation(PartialCancellationSO partialCancellationSO) {
         // 부분취소 유효성 체크
-        validationCheckService.partialCancellationValidationCheck(partialCancellationSO);
+        partialCancellationSO.partialCancellationValidationCheck();
 
         // 올바른 amount id인지 판단 및 예외처리
         AmountEntity amountEntity = getAmountEntityById(partialCancellationSO.getAmountId());
