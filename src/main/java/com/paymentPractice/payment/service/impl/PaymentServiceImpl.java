@@ -101,15 +101,12 @@ public class PaymentServiceImpl implements PaymentService {
         // 해당 결제 정보 반환
         PaymentEntity paymentEntity = getPaymentEntity(amountEntity);
 
-        // 남은 결제금액과 부가가치세 계산
-        RestAmountAndVat restAmountAndVat = getRestAmountAndVat(paymentEntity);
-
         // 금액 데이터 저장
         AmountEntity cancelAmount = AmountEntity.builder()
-                .amount(restAmountAndVat.getAmount())
+                .amount(paymentEntity.getRestAmount())
                 .paymentEntity(paymentEntity)
                 .amountType(AmountType.CANCEL)
-                .vat(restAmountAndVat.getVat())
+                .vat(paymentEntity.getRestVat())
                 .vatDefaultYn(YesOrNo.N)
                 .build();
         cancelAmount.setAmountInsertData();
@@ -134,8 +131,8 @@ public class PaymentServiceImpl implements PaymentService {
                 .installmentMonths(paymentEntity.getInstallmentMonths())
                 .expirationPeriod(cardInformation.getExpirationPeriod())
                 .cvc(Integer.parseInt(cardInformation.getCvc()))
-                .amount(restAmountAndVat.getAmount())
-                .vat(restAmountAndVat.getVat())
+                .amount(paymentEntity.getRestAmount())
+                .vat(paymentEntity.getRestVat())
                 .originalManagementNumber(getFirstPaymentAmountId(paymentEntity))
                 .encryptedCardInformation(paymentEntity.getCardInformation())
                 .spareField(paymentEntity.getUserId())
@@ -184,11 +181,8 @@ public class PaymentServiceImpl implements PaymentService {
         // 해당 결제 정보 반환
         PaymentEntity paymentEntity = getPaymentEntity(amountEntity);
 
-        // 남은 결제금액과 부가가치세 계산
-        RestAmountAndVat restAmountAndVat = getRestAmountAndVat(paymentEntity);
-
         // 취소 가능 여부 판단
-        partialCancellationAvailableCheck(partialCancellationSO, restAmountAndVat.getAmount(), restAmountAndVat.getVat());
+        partialCancellationAvailableCheck(partialCancellationSO, paymentEntity.getRestAmount(), paymentEntity.getRestVat());
 
         // 부가가치세 설정
         PartialCancellationVO partialCancellationVO = new PartialCancellationVO(partialCancellationSO);
@@ -198,14 +192,14 @@ public class PaymentServiceImpl implements PaymentService {
                 .amount(partialCancellationVO.getAmount())
                 .paymentEntity(paymentEntity)
                 .amountType(AmountType.CANCEL)
-                .vat(partialCancellationVO.getVat())
+                .vat(partialCancellationVO.getCalculatedVat())
                 .vatDefaultYn(partialCancellationVO.getVatDefaultYn())
                 .build();
         cancelAmount.setAmountInsertData();
         amountRepository.save(cancelAmount);
 
         // 결제상태, 할부개월수 데이터 저장
-        if(restAmountAndVat.getAmount() == partialCancellationVO.getAmount()) {
+        if(paymentEntity.getRestAmount() == partialCancellationVO.getAmount()) {
             paymentEntity.setPaymentStatus(PaymentStatus.CANCELLATION);
             paymentEntity.setInstallmentMonths(0);
         } else {
@@ -227,8 +221,8 @@ public class PaymentServiceImpl implements PaymentService {
                 .installmentMonths(paymentEntity.getInstallmentMonths())
                 .expirationPeriod(cardInformation.getExpirationPeriod())
                 .cvc(Integer.parseInt(cardInformation.getCvc()))
-                .amount(restAmountAndVat.getAmount())
-                .vat(restAmountAndVat.getVat())
+                .amount(paymentEntity.getRestAmount())
+                .vat(paymentEntity.getRestVat())
                 .originalManagementNumber(getFirstPaymentAmountId(paymentEntity))
                 .encryptedCardInformation(paymentEntity.getCardInformation())
                 .spareField(paymentEntity.getUserId())
@@ -274,21 +268,6 @@ public class PaymentServiceImpl implements PaymentService {
         return paymentEntity;
     }
 
-    // 남은 결제금액과 부가가치세 계산
-    private RestAmountAndVat getRestAmountAndVat(PaymentEntity paymentEntity) {
-        List<AmountEntity> amounts = paymentEntity.getAmounts();
-        // 금액 및 부가가치세를 PAYMENT면 + CANCEL이면 -해서 합함
-        int restAmount = amounts.stream()
-                .mapToInt(amount -> amount.getAmountType() == AmountType.PAYMENT ? amount.getAmount() : -amount.getAmount())
-                .sum();
-        int restVat = amounts.stream()
-                .mapToInt(amount -> amount.getAmountType() == AmountType.PAYMENT ? amount.getVat() : -amount.getVat())
-                .sum();
-        return RestAmountAndVat.builder()
-                .amount(restAmount)
-                .vat(restVat).build();
-    }
-
     // 취소 가능 여부 판단
     private static void partialCancellationAvailableCheck(PartialCancellationSO partialCancellationSO, int restAmount, int restVat) {
         // 취소 금액이 잔여금액보다 큰 경우
@@ -320,11 +299,4 @@ public class PaymentServiceImpl implements PaymentService {
         return firstPaymentAmountId;
     }
 
-    @Getter
-    @Setter
-    @Builder
-    private static class RestAmountAndVat {
-        private int amount;
-        private int vat;
-    }
 }

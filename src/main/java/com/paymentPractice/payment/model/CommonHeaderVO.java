@@ -64,7 +64,7 @@ public class CommonHeaderVO {
         }
     }
 
-    public int setTotalDataLength() {
+    public void setTotalDataLength() {
         int totalLength = 0;
         for (Field field : DataSenderVO.class.getDeclaredFields()) {
             // 필드에 적용된 어노테이션 정보 가져와서 반환
@@ -80,6 +80,6 @@ public class CommonHeaderVO {
                 totalLength += annotation.length();
             }
         }
-        return totalLength;
+        this.dataLength = totalLength;
     }
 }

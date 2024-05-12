@@ -1,5 +1,6 @@
 package com.paymentPractice.payment.entity;
 
+import com.paymentPractice.payment.service.impl.PaymentServiceImpl;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -67,12 +68,23 @@ public class PaymentEntity extends BaseEntity {
         setBaseInsertData(this.userId);
     }
 
-    public void addAmount(AmountEntity amountEntity) {
-        amountEntity.setPaymentEntity(this);
-        amounts.add(amountEntity);
-    }
-
     public void setPaymentModifiedData() {
         setBaseModifiedData(this.userId);
+    }
+
+    public int getRestAmount() {
+        // 금액 및 부가가치세를 PAYMENT면 + CANCEL이면 -해서 합함
+        int restAmount = this.amounts.stream()
+                .mapToInt(amount -> amount.getAmountType() == AmountType.PAYMENT ? amount.getAmount() : -amount.getAmount())
+                .sum();
+        return restAmount;
+    }
+
+    public int getRestVat() {
+        // 금액 및 부가가치세를 PAYMENT면 + CANCEL이면 -해서 합함
+        int restVat = this.amounts.stream()
+                .mapToInt(amount -> amount.getAmountType() == AmountType.PAYMENT ? amount.getVat() : -amount.getVat())
+                .sum();
+        return restVat;
     }
 }
