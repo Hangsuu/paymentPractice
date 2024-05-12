@@ -172,7 +172,7 @@ public class PaymentServiceImpl implements PaymentService {
         PaymentEntity paymentEntity = getPaymentEntity(amountEntity);
 
         // 취소 가능 여부 판단
-        partialCancellationAvailableCheck(partialCancellationSO, paymentEntity.getRestAmount(), paymentEntity.getRestVat());
+        partialCancellationSO.partialCancellationAvailableCheck(paymentEntity.getRestAmount(), paymentEntity.getRestVat());
 
         // 부가가치세 설정
         PartialCancellationVO partialCancellationVO = new PartialCancellationVO(partialCancellationSO);
@@ -256,25 +256,6 @@ public class PaymentServiceImpl implements PaymentService {
             throw new CustomException(ErrorCode.ALREADY_CANCELLED_PAYMENT);
         }
         return paymentEntity;
-    }
-
-    // 취소 가능 여부 판단
-    private static void partialCancellationAvailableCheck(PartialCancellationSO partialCancellationSO, int restAmount, int restVat) {
-        // 취소 금액이 잔여금액보다 큰 경우
-        if (restAmount < partialCancellationSO.getAmount()) {
-            throw new CustomException(ErrorCode.EXCEED_REST_AMOUNT);
-        }
-        // 취소 부가가치세가 잔여 부가가치세보다 큰 경우
-        if (partialCancellationSO.getVat() != null
-                && restVat < partialCancellationSO.getVat()) {
-            throw new CustomException(ErrorCode.EXCEED_REST_VAT);
-        }
-        // 잔여 부가가치세가 남는 경우
-        if (restAmount == partialCancellationSO.getAmount()
-                && partialCancellationSO.getVat() != null
-                && restVat - partialCancellationSO.getVat() > 0) {
-            throw new CustomException(ErrorCode.EXIST_REST_VAT);
-        }
     }
 
     // 최초 결제 ID
