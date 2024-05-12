@@ -63,4 +63,23 @@ public class CommonHeaderVO {
             throw new RuntimeException(e);
         }
     }
+
+    public int setTotalDataLength() {
+        int totalLength = 0;
+        for (Field field : DataSenderVO.class.getDeclaredFields()) {
+            // 필드에 적용된 어노테이션 정보 가져와서 반환
+            StringLength annotation = field.getAnnotation(StringLength.class);
+            if (annotation != null) {
+                totalLength += annotation.length();
+            }
+        }
+        for (Field field : CommonHeaderVO.class.getDeclaredFields()) {
+            // 필드에 적용된 어노테이션 정보 가져와서 반환
+            StringLength annotation = field.getAnnotation(StringLength.class);
+            if (annotation != null && !field.getName().equals("dataLength")) {
+                totalLength += annotation.length();
+            }
+        }
+        return totalLength;
+    }
 }

@@ -67,10 +67,10 @@ public class PaymentServiceImpl implements PaymentService {
 
         // 전달할 String data 헤더, 데이터 객체 생성
         CommonHeaderVO header = CommonHeaderVO.builder()
-                .dataLength(getHeaderAndDataLength())
                 .dataDivision(String.valueOf(AmountType.PAYMENT))
                 .managementNumber(amountEntity.getAmountId())
                 .build();
+        header.setTotalDataLength();
         DataSenderVO sender = DataSenderVO.builder()
                 .cardNumber(paymentVO.getCardNumber())
                 .installmentMonths(paymentVO.getInstallmentMonths())
@@ -125,10 +125,10 @@ public class PaymentServiceImpl implements PaymentService {
 
         // 전달할 String data 헤더, 데이터 객체 생성
         CommonHeaderVO header = CommonHeaderVO.builder()
-                .dataLength(getHeaderAndDataLength())
                 .dataDivision(String.valueOf(AmountType.CANCEL))
                 .managementNumber(amountEntity.getAmountId())
                 .build();
+        header.setTotalDataLength();
         DataSenderVO sender = DataSenderVO.builder()
                 .cardNumber(cardInformation.getCardNumber())
                 .installmentMonths(paymentEntity.getInstallmentMonths())
@@ -218,10 +218,10 @@ public class PaymentServiceImpl implements PaymentService {
 
         // 전달할 String data 헤더, 데이터 객체 생성
         CommonHeaderVO header = CommonHeaderVO.builder()
-                .dataLength(getHeaderAndDataLength())
                 .dataDivision(String.valueOf(AmountType.CANCEL))
                 .managementNumber(amountEntity.getAmountId())
                 .build();
+        header.setTotalDataLength();
         DataSenderVO sender = DataSenderVO.builder()
                 .cardNumber(cardInformation.getCardNumber())
                 .installmentMonths(paymentEntity.getInstallmentMonths())
@@ -320,39 +320,11 @@ public class PaymentServiceImpl implements PaymentService {
         return firstPaymentAmountId;
     }
 
-    // StrengthLength 어노테이션의 length값 총합 반환
-    private int getHeaderAndDataLength() {
-        int totalLength = 0;
-        for (Field field : DataSenderVO.class.getDeclaredFields()) {
-            // 필드에 적용된 어노테이션 정보 가져와서 반환
-            StringLength annotation = field.getAnnotation(StringLength.class);
-            if (annotation != null) {
-                totalLength += annotation.length();
-            }
-        }
-        for (Field field : CommonHeaderVO.class.getDeclaredFields()) {
-            // 필드에 적용된 어노테이션 정보 가져와서 반환
-            StringLength annotation = field.getAnnotation(StringLength.class);
-            if (annotation != null && !field.getName().equals("dataLength")) {
-                totalLength += annotation.length();
-            }
-        }
-        return totalLength;
-    }
-
     @Getter
     @Setter
     @Builder
     private static class RestAmountAndVat {
         private int amount;
         private int vat;
-    }
-
-    @Getter
-    @Setter
-    @Builder
-    private static class CalculatedVat {
-        private int vat;
-        YesOrNo vatDefaultYn;
     }
 }
