@@ -1,5 +1,7 @@
 package com.paymentPractice.payment.entity;
 
+import com.paymentPractice.common.exception.CustomException;
+import com.paymentPractice.common.model.ErrorCode;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -62,6 +64,14 @@ public class AmountEntity extends BaseEntity {
 
         // Base Entity 데이터 입력
         setBaseInsertData(this.paymentEntity.getUserId());
+    }
+
+    public PaymentEntity getPaymentEntityWithCancellationCheck() {
+        // 이미 취소된 결제 건인지 확인
+        if (this.paymentEntity.getPaymentStatus() == PaymentStatus.CANCELLATION) {
+            throw new CustomException(ErrorCode.ALREADY_CANCELLED_PAYMENT);
+        }
+        return this.paymentEntity;
     }
 
 }

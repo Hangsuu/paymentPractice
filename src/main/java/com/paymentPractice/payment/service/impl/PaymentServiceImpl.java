@@ -89,7 +89,7 @@ public class PaymentServiceImpl implements PaymentService {
         AmountEntity amountEntity = getAmountEntityById(paymentCancellationSO.getAmountId());
 
         // 해당 결제 정보 반환
-        PaymentEntity paymentEntity = getPaymentEntity(amountEntity);
+        PaymentEntity paymentEntity = amountEntity.getPaymentEntityWithCancellationCheck();
 
         // 금액 데이터 저장
         AmountEntity cancelAmount = AmountEntity.builder()
@@ -169,7 +169,7 @@ public class PaymentServiceImpl implements PaymentService {
         AmountEntity amountEntity = getAmountEntityById(partialCancellationSO.getAmountId());
 
         // 해당 결제 정보 반환
-        PaymentEntity paymentEntity = getPaymentEntity(amountEntity);
+        PaymentEntity paymentEntity = amountEntity.getPaymentEntityWithCancellationCheck();
 
         // 취소 가능 여부 판단
         partialCancellationSO.partialCancellationAvailableCheck(paymentEntity.getRestAmount(), paymentEntity.getRestVat());
@@ -246,16 +246,6 @@ public class PaymentServiceImpl implements PaymentService {
                     throw new CustomException(ErrorCode.WRONG_AMOUNT_ID);
                 });
         return amountEntity;
-    }
-
-    // 해당 결제 정보 반환
-    private static PaymentEntity getPaymentEntity(AmountEntity amountEntity) {
-        PaymentEntity paymentEntity = amountEntity.getPaymentEntity();
-        // 이미 취소된 결제 건인지 확인
-        if (paymentEntity.getPaymentStatus() == PaymentStatus.CANCELLATION) {
-            throw new CustomException(ErrorCode.ALREADY_CANCELLED_PAYMENT);
-        }
-        return paymentEntity;
     }
 
 }
