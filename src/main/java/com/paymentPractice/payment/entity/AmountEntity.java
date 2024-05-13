@@ -63,4 +63,5 @@ public class AmountEntity extends BaseEntity {
         // Base Entity 데이터 입력
         setBaseInsertData(this.paymentEntity.getUserId());
     }
+
 }

@@ -1,5 +1,7 @@
 package com.paymentPractice.payment.entity;
 
+import com.paymentPractice.common.exception.CustomException;
+import com.paymentPractice.common.model.ErrorCode;
 import com.paymentPractice.payment.service.impl.PaymentServiceImpl;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -86,5 +88,17 @@ public class PaymentEntity extends BaseEntity {
                 .mapToInt(amount -> amount.getAmountType() == AmountType.PAYMENT ? amount.getVat() : -amount.getVat())
                 .sum();
         return restVat;
+    }
+
+
+    public String getFirstPaymentAmountId() {
+        // 전체 결제건에 대하여 최초 결제 id를 불러옴
+        String firstPaymentAmountId = this.amounts.stream()
+                .filter(amount -> amount.getAmountType() == AmountType.PAYMENT)
+                .findFirst()
+                .orElseThrow(() -> {
+                    throw new CustomException(ErrorCode.WRONG_PAYMENT);
+                }).getAmountId();
+        return firstPaymentAmountId;
     }
 }

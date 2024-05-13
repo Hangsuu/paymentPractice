@@ -123,7 +123,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .cvc(Integer.parseInt(cardInformation.getCvc()))
                 .amount(paymentEntity.getRestAmount())
                 .vat(paymentEntity.getRestVat())
-                .originalManagementNumber(getFirstPaymentAmountId(paymentEntity))
+                .originalManagementNumber(paymentEntity.getFirstPaymentAmountId())
                 .encryptedCardInformation(paymentEntity.getCardInformation())
                 .spareField(paymentEntity.getUserId())
                 .build();
@@ -213,7 +213,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .cvc(Integer.parseInt(cardInformation.getCvc()))
                 .amount(paymentEntity.getRestAmount())
                 .vat(paymentEntity.getRestVat())
-                .originalManagementNumber(getFirstPaymentAmountId(paymentEntity))
+                .originalManagementNumber(paymentEntity.getFirstPaymentAmountId())
                 .encryptedCardInformation(paymentEntity.getCardInformation())
                 .spareField(paymentEntity.getUserId())
                 .build();
@@ -256,18 +256,6 @@ public class PaymentServiceImpl implements PaymentService {
             throw new CustomException(ErrorCode.ALREADY_CANCELLED_PAYMENT);
         }
         return paymentEntity;
-    }
-
-    // 최초 결제 ID
-    private static String getFirstPaymentAmountId(PaymentEntity paymentEntity) {
-        // 전체 결제건에 대하여 최초 결제 id를 불러옴
-        String firstPaymentAmountId = paymentEntity.getAmounts().stream()
-                .filter(amount -> amount.getAmountType() == AmountType.PAYMENT)
-                .findFirst()
-                .orElseThrow(() -> {
-                    throw new CustomException(ErrorCode.WRONG_PAYMENT);
-                }).getAmountId();
-        return firstPaymentAmountId;
     }
 
 }
