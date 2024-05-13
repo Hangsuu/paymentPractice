@@ -28,9 +28,6 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     @MethodLog(description = "결제 메서드")
     public PaymentResultVO payment(PaymentSO paymentSO) {
-        // 결제 유효성 체크
-        paymentSO.paymentValidationCheck();
-
         PaymentVO paymentVO = new PaymentVO(paymentSO);
 
         // 카드정보 암호화
@@ -163,7 +160,7 @@ public class PaymentServiceImpl implements PaymentService {
     @MethodLog(description = "결제 부분취소 메서드")
     public PaymentResultVO partialCancellation(PartialCancellationSO partialCancellationSO) {
         // 부분취소 유효성 체크
-        partialCancellationSO.partialCancellationValidationCheck();
+        PartialCancellationVO partialCancellationVO = new PartialCancellationVO(partialCancellationSO);
 
         // 올바른 amount id인지 판단 및 예외처리
         AmountEntity amountEntity = getAmountEntityById(partialCancellationSO.getAmountId());
@@ -173,9 +170,6 @@ public class PaymentServiceImpl implements PaymentService {
 
         // 취소 가능 여부 판단
         partialCancellationSO.partialCancellationAvailableCheck(paymentEntity.getRestAmount(), paymentEntity.getRestVat());
-
-        // 부가가치세 설정
-        PartialCancellationVO partialCancellationVO = new PartialCancellationVO(partialCancellationSO);
 
         // 금액 데이터 저장
         AmountEntity cancelAmount = AmountEntity.builder()

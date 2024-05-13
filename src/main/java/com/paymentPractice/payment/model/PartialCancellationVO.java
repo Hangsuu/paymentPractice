@@ -9,6 +9,7 @@ import lombok.Setter;
 public class PartialCancellationVO extends CalculatedVatVO{
 
     public PartialCancellationVO(PartialCancellationSO so) {
+        so.partialCancellationValidationCheck();
         this.amountId = so.getAmountId();
         this.amount = so.getAmount();
         this.vat = so.getVat();

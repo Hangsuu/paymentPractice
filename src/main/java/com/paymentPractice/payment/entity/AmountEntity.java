@@ -44,10 +44,6 @@ public class AmountEntity extends BaseEntity {
     @JoinColumn(name = "PAYMENT_ID")
     private PaymentEntity paymentEntity;
 
-    public void setPaymentEntity(PaymentEntity paymentEntity) {
-        this.paymentEntity = paymentEntity;
-    }
-
     // ID 및 BaseEntity 정보 입력
     public void setAmountInsertData() {
         StringBuilder stringBuilder = new StringBuilder();

@@ -9,6 +9,9 @@ import lombok.Setter;
 @Setter
 public class PaymentVO extends CalculatedVatVO{
     public PaymentVO(PaymentSO so) {
+        // 결제 유효성 체크
+        so.paymentValidationCheck();
+
         this.cardNumber = so.getCardNumber();
         this.expirationPeriod = so.getExpirationPeriod();
         this.cvc = so.getCvc();
