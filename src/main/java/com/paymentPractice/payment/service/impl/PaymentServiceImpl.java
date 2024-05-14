@@ -67,7 +67,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .vat(paymentVO.getCalculatedVat())
                 .originalManagementNumber("")
                 .encryptedCardInformation(paymentVO.getEncryptedCardInformation())
-                .spareField(paymentEntity.getUserId())
+                .spareField(paymentVO.getUserId())
                 .build();
 
         // String data 생성 및 전송
@@ -100,9 +100,7 @@ public class PaymentServiceImpl implements PaymentService {
         amountRepository.save(cancelAmount);
 
         // 결제상태, 할부개월수 데이터 저장
-        paymentEntity.setPaymentStatus(PaymentStatus.CANCELLATION);
-        paymentEntity.setInstallmentMonths(0);
-        paymentEntity.setPaymentModifiedData();
+        paymentEntity.setCancellation();
 
         // 카드정보 복호화 (카드번호/만료일자/cvc)
         CardInformationVO cardInformation = cardInformationConversionService.getCardInformation(paymentEntity);

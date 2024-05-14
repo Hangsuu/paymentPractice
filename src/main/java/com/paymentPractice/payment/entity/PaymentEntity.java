@@ -101,4 +101,10 @@ public class PaymentEntity extends BaseEntity {
                 }).getAmountId();
         return firstPaymentAmountId;
     }
+
+    public void setCancellation() {
+        paymentStatus = PaymentStatus.CANCELLATION;
+        installmentMonths = 0;
+        setBaseModifiedData(this.userId);
+    }
 }
