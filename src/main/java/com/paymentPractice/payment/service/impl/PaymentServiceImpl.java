@@ -145,7 +145,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         return PaymentInformationVO.builder()
                 .amountId(amountEntity.getAmountId())
-                .cardNumber(cardInformationConversionService.maskingCardNumber(cardInformation.getCardNumber()))
+                .cardNumber(cardInformation.getCardNumber())
                 .expirationPeriod(cardInformation.getExpirationPeriod())
                 .cvc(cardInformation.getCvc())
                 .amountType(amountEntity.getAmountType())

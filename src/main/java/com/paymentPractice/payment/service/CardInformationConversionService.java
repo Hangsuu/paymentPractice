@@ -10,6 +10,4 @@ public interface CardInformationConversionService {
     void getEncryptedCardInformation(PaymentVO paymentVO);
     // 카드정보 복호화
     CardInformationVO getCardInformation(PaymentEntity paymentEntity);
-    // 카드정보 마스킹
-    String maskingCardNumber(String cardNumber);
 }

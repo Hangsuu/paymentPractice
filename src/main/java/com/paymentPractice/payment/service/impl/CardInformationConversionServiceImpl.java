@@ -33,14 +33,13 @@ public class CardInformationConversionServiceImpl implements CardInformationConv
         String decryptedCardInformation = twoWayEncryptionService.decrypt(paymentEntity.getCardInformation());
         String[] cardInformations = decryptedCardInformation.split("/");
         CardInformationVO cardInformation = CardInformationVO.builder()
-                .cardNumber(cardInformations[0])
+                .cardNumber(maskingCardNumber(cardInformations[0]))
                 .expirationPeriod(cardInformations[1])
                 .cvc(cardInformations[2]).build();
         return cardInformation;
     }
 
-    @Override
-    public String maskingCardNumber(String cardNumber) {
+    private String maskingCardNumber(String cardNumber) {
         StringBuffer stringBuffer = new StringBuffer();
         String[] cardNumbers = cardNumber.split("");
         for(int i=0; i < cardNumbers.length; i++) {
