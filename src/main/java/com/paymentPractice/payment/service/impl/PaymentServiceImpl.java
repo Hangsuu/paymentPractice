@@ -160,19 +160,6 @@ public class PaymentServiceImpl implements PaymentService {
                 .stringData(stringData).build();
     }
 
-    // String data 생성 및 전송
-    private String getAndSendStringData(CommonHeaderVO header, DataSenderVO sender) {
-        String stringData = header.getStringData() + sender.getStringData();
-
-        // String data 전송
-        boolean sendDateSuccess = cardApiService.sendHttpToCardApi(stringData);
-        // 통신 실패 시(예외 발생) 예외 발생
-        if(!sendDateSuccess) {
-            throw new CustomException(ErrorCode.TRANSFER_DATA_FAIL);
-        }
-        return stringData;
-    }
-
     // 올바른 amount id인지 판단 및 예외처리
     private AmountEntity getAmountEntityById(String amountId) {
         AmountEntity amountEntity = amountRepository.findById(amountId)
