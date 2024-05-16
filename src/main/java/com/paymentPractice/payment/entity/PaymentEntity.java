@@ -2,7 +2,7 @@ package com.paymentPractice.payment.entity;
 
 import com.paymentPractice.common.exception.CustomException;
 import com.paymentPractice.common.model.ErrorCode;
-import com.paymentPractice.payment.service.impl.PaymentServiceImpl;
+import com.paymentPractice.payment.model.PartialCancellationVO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -47,13 +47,6 @@ public class PaymentEntity extends BaseEntity {
     @Version
     private Long version;
 
-    public void setPaymentStatus(PaymentStatus paymentStatus) {
-        this.paymentStatus = paymentStatus;
-    }
-    public void setInstallmentMonths(int installmentMonths) {
-        this.installmentMonths = installmentMonths;
-    }
-
     // ID 및 BaseEntity 정보 입력
     public void setPaymentInsertData() {
         StringBuilder stringBuilder = new StringBuilder();
@@ -68,10 +61,6 @@ public class PaymentEntity extends BaseEntity {
 
         this.paymentId = stringBuilder.toString();
         setBaseInsertData(this.userId);
-    }
-
-    public void setPaymentModifiedData() {
-        setBaseModifiedData(this.userId);
     }
 
     public int getRestAmount() {
@@ -90,7 +79,6 @@ public class PaymentEntity extends BaseEntity {
         return restVat;
     }
 
-
     public String getFirstPaymentAmountId() {
         // 전체 결제건에 대하여 최초 결제 id를 불러옴
         String firstPaymentAmountId = this.amounts.stream()
@@ -105,6 +93,17 @@ public class PaymentEntity extends BaseEntity {
     public void setCancellation() {
         paymentStatus = PaymentStatus.CANCELLATION;
         installmentMonths = 0;
+        setBaseModifiedData(this.userId);
+    }
+
+    public void setPartialCancellation(PartialCancellationVO partialCancellationVO) {
+        // 결제상태, 할부개월수 데이터 저장
+        if(this.getRestAmount() == partialCancellationVO.getAmount()) {
+            this.paymentStatus = PaymentStatus.CANCELLATION;
+            this.installmentMonths = 0;
+        } else {
+            this.paymentStatus = PaymentStatus.PARTIAL_CANCELLATION;
+        }
         setBaseModifiedData(this.userId);
     }
 }

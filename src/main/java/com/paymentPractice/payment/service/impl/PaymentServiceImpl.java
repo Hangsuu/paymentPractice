@@ -7,7 +7,6 @@ import com.paymentPractice.payment.entity.*;
 import com.paymentPractice.payment.model.*;
 import com.paymentPractice.payment.repository.AmountRepository;
 import com.paymentPractice.payment.repository.PaymentRepository;
-import com.paymentPractice.payment.service.CardApiService;
 import com.paymentPractice.payment.service.CardInformationConversionService;
 import com.paymentPractice.payment.service.PaymentService;
 import com.paymentPractice.payment.service.TransferAndGetStringDataService;
@@ -22,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class PaymentServiceImpl implements PaymentService {
     private final PaymentRepository paymentRepository;
     private final AmountRepository amountRepository;
-    private final CardApiService cardApiService;
     private final CardInformationConversionService cardInformationConversionService;
     private final TransferAndGetStringDataService transferAndGetStringDataService;
 
@@ -143,14 +141,7 @@ public class PaymentServiceImpl implements PaymentService {
         cancelAmount.setAmountInsertData();
         amountRepository.save(cancelAmount);
 
-        // 결제상태, 할부개월수 데이터 저장
-        if(paymentEntity.getRestAmount() == partialCancellationVO.getAmount()) {
-            paymentEntity.setPaymentStatus(PaymentStatus.CANCELLATION);
-            paymentEntity.setInstallmentMonths(0);
-        } else {
-            paymentEntity.setPaymentStatus(PaymentStatus.PARTIAL_CANCELLATION);
-        }
-        paymentEntity.setPaymentModifiedData();
+        paymentEntity.setPartialCancellation(partialCancellationVO);
 
         // String data 생성 및 전송
         String stringData = transferAndGetStringDataService.paymentCancellationSendingData(amountEntity.getAmountId(), paymentEntity);
