@@ -10,6 +10,7 @@ import com.paymentPractice.payment.repository.PaymentRepository;
 import com.paymentPractice.payment.service.CardApiService;
 import com.paymentPractice.payment.service.CardInformationConversionService;
 import com.paymentPractice.payment.service.PaymentService;
+import com.paymentPractice.payment.service.TransferAndGetStringDataService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final AmountRepository amountRepository;
     private final CardApiService cardApiService;
     private final CardInformationConversionService cardInformationConversionService;
+    private final TransferAndGetStringDataService transferAndGetStringDataService;
 
     @Override
     @Transactional
@@ -52,26 +54,8 @@ public class PaymentServiceImpl implements PaymentService {
         amountEntity.setAmountInsertData();
         amountRepository.save(amountEntity);
 
-        // 전달할 String data 헤더, 데이터 객체 생성
-        CommonHeaderVO header = CommonHeaderVO.builder()
-                .dataDivision(String.valueOf(AmountType.PAYMENT))
-                .managementNumber(amountEntity.getAmountId())
-                .build();
-        header.setTotalDataLength();
-        DataSenderVO sender = DataSenderVO.builder()
-                .cardNumber(paymentVO.getCardNumber())
-                .installmentMonths(paymentVO.getInstallmentMonths())
-                .expirationPeriod(paymentVO.getExpirationPeriod())
-                .cvc(Integer.parseInt(paymentVO.getCvc()))
-                .amount(paymentVO.getAmount())
-                .vat(paymentVO.getCalculatedVat())
-                .originalManagementNumber("")
-                .encryptedCardInformation(paymentVO.getEncryptedCardInformation())
-                .spareField(paymentVO.getUserId())
-                .build();
-
         // String data 생성 및 전송
-        String stringData = getAndSendStringData(header, sender);
+        String stringData = transferAndGetStringDataService.paymentSendingData(amountEntity.getAmountId(), paymentVO);
 
         return PaymentResultVO.builder()
                 .amountId(amountEntity.getAmountId())
@@ -102,29 +86,8 @@ public class PaymentServiceImpl implements PaymentService {
         // 결제상태, 할부개월수 데이터 저장
         paymentEntity.setCancellation();
 
-        // 카드정보 복호화 (카드번호/만료일자/cvc)
-        CardInformationVO cardInformation = cardInformationConversionService.getCardInformation(paymentEntity);
-
-        // 전달할 String data 헤더, 데이터 객체 생성
-        CommonHeaderVO header = CommonHeaderVO.builder()
-                .dataDivision(String.valueOf(AmountType.CANCEL))
-                .managementNumber(amountEntity.getAmountId())
-                .build();
-        header.setTotalDataLength();
-        DataSenderVO sender = DataSenderVO.builder()
-                .cardNumber(cardInformation.getCardNumber())
-                .installmentMonths(paymentEntity.getInstallmentMonths())
-                .expirationPeriod(cardInformation.getExpirationPeriod())
-                .cvc(Integer.parseInt(cardInformation.getCvc()))
-                .amount(paymentEntity.getRestAmount())
-                .vat(paymentEntity.getRestVat())
-                .originalManagementNumber(paymentEntity.getFirstPaymentAmountId())
-                .encryptedCardInformation(paymentEntity.getCardInformation())
-                .spareField(paymentEntity.getUserId())
-                .build();
-
         // String data 생성 및 전송
-        String stringData = getAndSendStringData(header, sender);
+        String stringData = transferAndGetStringDataService.paymentCancellationSendingData(amountEntity.getAmountId(), paymentEntity);
 
         return PaymentResultVO.builder()
                 .amountId(cancelAmount.getAmountId())
@@ -189,29 +152,8 @@ public class PaymentServiceImpl implements PaymentService {
         }
         paymentEntity.setPaymentModifiedData();
 
-        // 카드정보 복호화 (카드번호/만료일자/cvc)
-        CardInformationVO cardInformation = cardInformationConversionService.getCardInformation(paymentEntity);
-
-        // 전달할 String data 헤더, 데이터 객체 생성
-        CommonHeaderVO header = CommonHeaderVO.builder()
-                .dataDivision(String.valueOf(AmountType.CANCEL))
-                .managementNumber(amountEntity.getAmountId())
-                .build();
-        header.setTotalDataLength();
-        DataSenderVO sender = DataSenderVO.builder()
-                .cardNumber(cardInformation.getCardNumber())
-                .installmentMonths(paymentEntity.getInstallmentMonths())
-                .expirationPeriod(cardInformation.getExpirationPeriod())
-                .cvc(Integer.parseInt(cardInformation.getCvc()))
-                .amount(paymentEntity.getRestAmount())
-                .vat(paymentEntity.getRestVat())
-                .originalManagementNumber(paymentEntity.getFirstPaymentAmountId())
-                .encryptedCardInformation(paymentEntity.getCardInformation())
-                .spareField(paymentEntity.getUserId())
-                .build();
-
         // String data 생성 및 전송
-        String stringData = getAndSendStringData(header, sender);
+        String stringData = transferAndGetStringDataService.paymentCancellationSendingData(amountEntity.getAmountId(), paymentEntity);
 
         return PaymentResultVO.builder()
                 .amountId(cancelAmount.getAmountId())
