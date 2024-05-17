@@ -68,10 +68,8 @@ public class TransferAndGetStringDataServiceImpl implements TransferAndGetString
     // String data 생성 및 전송
     private String getAndSendStringData(CommonHeaderVO header, DataSenderVO sender) {
         String stringData = header.getStringData() + sender.getStringData();
-
         // String data 전송
         boolean sendDateSuccess = cardApiService.sendHttpToCardApi(stringData);
-        // 통신 실패 시(예외 발생) 예외 발생
         if(!sendDateSuccess) {
             throw new CustomException(ErrorCode.TRANSFER_DATA_FAIL);
         }
