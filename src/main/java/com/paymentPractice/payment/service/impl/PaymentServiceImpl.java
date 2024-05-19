@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @AllArgsConstructor
 public class PaymentServiceImpl implements PaymentService {
-    private final PaymentRepository paymentRepository;
     private final AmountRepository amountRepository;
     private final CardInformationConversionService cardInformationConversionService;
     private final TransferAndGetStringDataService transferAndGetStringDataService;

@@ -1,10 +1,7 @@
 package com.paymentPractice.payment.service.impl;
 
-import com.paymentPractice.common.exception.CustomException;
-import com.paymentPractice.common.model.ErrorCode;
 import com.paymentPractice.payment.entity.*;
 import com.paymentPractice.payment.model.PartialCancellationVO;
-import com.paymentPractice.payment.model.PaymentCancellationSO;
 import com.paymentPractice.payment.model.PaymentVO;
 import com.paymentPractice.payment.repository.AmountRepository;
 import com.paymentPractice.payment.repository.PaymentRepository;
