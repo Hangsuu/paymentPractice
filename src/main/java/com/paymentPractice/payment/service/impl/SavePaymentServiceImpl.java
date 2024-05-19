@@ -1,9 +1,10 @@
 package com.paymentPractice.payment.service.impl;
 
-import com.paymentPractice.payment.entity.AmountEntity;
-import com.paymentPractice.payment.entity.AmountType;
-import com.paymentPractice.payment.entity.PaymentEntity;
-import com.paymentPractice.payment.entity.PaymentStatus;
+import com.paymentPractice.common.exception.CustomException;
+import com.paymentPractice.common.model.ErrorCode;
+import com.paymentPractice.payment.entity.*;
+import com.paymentPractice.payment.model.PartialCancellationVO;
+import com.paymentPractice.payment.model.PaymentCancellationSO;
 import com.paymentPractice.payment.model.PaymentVO;
 import com.paymentPractice.payment.repository.AmountRepository;
 import com.paymentPractice.payment.repository.PaymentRepository;
@@ -38,5 +39,38 @@ public class SavePaymentServiceImpl implements SavePaymentService {
         amountRepository.save(amountEntity);
 
         return amountEntity.getAmountId();
+    }
+
+    @Override
+    public String savePaymentCancellation(PaymentEntity paymentEntity) {
+        // 금액 데이터 저장
+        AmountEntity cancelAmount = AmountEntity.builder()
+                .amount(paymentEntity.getRestAmount())
+                .paymentEntity(paymentEntity)
+                .amountType(AmountType.CANCEL)
+                .vat(paymentEntity.getRestVat())
+                .vatDefaultYn(YesOrNo.N)
+                .build();
+        cancelAmount.setAmountInsertData();
+        amountRepository.save(cancelAmount);
+        return cancelAmount.getAmountId();
+    }
+
+    @Override
+    public String savePartialCancellation(PartialCancellationVO partialCancellationVO, PaymentEntity paymentEntity) {
+        // 금액 데이터 저장
+        AmountEntity cancelAmount = AmountEntity.builder()
+                .amount(partialCancellationVO.getAmount())
+                .paymentEntity(paymentEntity)
+                .amountType(AmountType.CANCEL)
+                .vat(partialCancellationVO.getCalculatedVat())
+                .vatDefaultYn(partialCancellationVO.getVatDefaultYn())
+                .build();
+        cancelAmount.setAmountInsertData();
+        amountRepository.save(cancelAmount);
+
+        paymentEntity.setPartialCancellation(partialCancellationVO);
+
+        return cancelAmount.getAmountId();
     }
 }

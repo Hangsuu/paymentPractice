@@ -57,15 +57,7 @@ public class PaymentServiceImpl implements PaymentService {
         PaymentEntity paymentEntity = amountEntity.getPaymentEntityWithCancellationCheck();
 
         // 금액 데이터 저장
-        AmountEntity cancelAmount = AmountEntity.builder()
-                .amount(paymentEntity.getRestAmount())
-                .paymentEntity(paymentEntity)
-                .amountType(AmountType.CANCEL)
-                .vat(paymentEntity.getRestVat())
-                .vatDefaultYn(YesOrNo.N)
-                .build();
-        cancelAmount.setAmountInsertData();
-        amountRepository.save(cancelAmount);
+        String cancelAmountId = savePaymentService.savePaymentCancellation(paymentEntity);
 
         // 결제상태, 할부개월수 데이터 저장
         paymentEntity.setCancellation();
@@ -74,7 +66,7 @@ public class PaymentServiceImpl implements PaymentService {
         String stringData = transferAndGetStringDataService.paymentCancellationSendingData(amountEntity.getAmountId(), paymentEntity);
 
         return PaymentResultVO.builder()
-                .amountId(cancelAmount.getAmountId())
+                .amountId(cancelAmountId)
                 .stringData(stringData).build();
     }
 
@@ -114,26 +106,15 @@ public class PaymentServiceImpl implements PaymentService {
         PaymentEntity paymentEntity = amountEntity.getPaymentEntityWithCancellationCheck();
 
         // 취소 가능 여부 판단
-        partialCancellationSO.partialCancellationAvailableCheck(paymentEntity.getRestAmount(), paymentEntity.getRestVat());
+        partialCancellationVO.partialCancellationAvailableCheck(paymentEntity.getRestAmount(), paymentEntity.getRestVat());
 
-        // 금액 데이터 저장
-        AmountEntity cancelAmount = AmountEntity.builder()
-                .amount(partialCancellationVO.getAmount())
-                .paymentEntity(paymentEntity)
-                .amountType(AmountType.CANCEL)
-                .vat(partialCancellationVO.getCalculatedVat())
-                .vatDefaultYn(partialCancellationVO.getVatDefaultYn())
-                .build();
-        cancelAmount.setAmountInsertData();
-        amountRepository.save(cancelAmount);
-
-        paymentEntity.setPartialCancellation(partialCancellationVO);
+        String cancelAmountId = savePaymentService.savePartialCancellation(partialCancellationVO, paymentEntity);
 
         // String data 생성 및 전송
         String stringData = transferAndGetStringDataService.paymentCancellationSendingData(amountEntity.getAmountId(), paymentEntity);
 
         return PaymentResultVO.builder()
-                .amountId(cancelAmount.getAmountId())
+                .amountId(cancelAmountId)
                 .stringData(stringData).build();
     }
 

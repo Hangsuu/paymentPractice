@@ -1,5 +1,7 @@
 package com.paymentPractice.payment.model;
 
+import com.paymentPractice.common.exception.CustomException;
+import com.paymentPractice.common.model.ErrorCode;
 import com.paymentPractice.payment.entity.YesOrNo;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,4 +24,22 @@ public class PartialCancellationVO extends CalculatedVatVO{
     private int amount;
     // 취소 부가가치세
     private Integer vat;
+
+    public void partialCancellationAvailableCheck(int restAmount, int restVat) {
+        // 취소 금액이 잔여금액보다 큰 경우
+        if (restAmount < this.amount) {
+            throw new CustomException(ErrorCode.EXCEED_REST_AMOUNT);
+        }
+        // 취소 부가가치세가 잔여 부가가치세보다 큰 경우
+        if (this.vat != null
+                && restVat < this.vat) {
+            throw new CustomException(ErrorCode.EXCEED_REST_VAT);
+        }
+        // 잔여 부가가치세가 남는 경우
+        if (restAmount == this.amount
+                && this.vat != null
+                && restVat - this.vat > 0) {
+            throw new CustomException(ErrorCode.EXIST_REST_VAT);
+        }
+    }
 }

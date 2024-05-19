@@ -27,21 +27,4 @@ public class PartialCancellationSO {
         }
     }
 
-    public void partialCancellationAvailableCheck(int restAmount, int restVat) {
-        // 취소 금액이 잔여금액보다 큰 경우
-        if (restAmount < this.amount) {
-            throw new CustomException(ErrorCode.EXCEED_REST_AMOUNT);
-        }
-        // 취소 부가가치세가 잔여 부가가치세보다 큰 경우
-        if (this.vat != null
-                && restVat < this.vat) {
-            throw new CustomException(ErrorCode.EXCEED_REST_VAT);
-        }
-        // 잔여 부가가치세가 남는 경우
-        if (restAmount == this.amount
-                && this.vat != null
-                && restVat - this.vat > 0) {
-            throw new CustomException(ErrorCode.EXIST_REST_VAT);
-        }
-    }
 }
