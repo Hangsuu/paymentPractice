@@ -9,6 +9,7 @@ import com.paymentPractice.payment.repository.AmountRepository;
 import com.paymentPractice.payment.repository.PaymentRepository;
 import com.paymentPractice.payment.service.CardInformationConversionService;
 import com.paymentPractice.payment.service.PaymentService;
+import com.paymentPractice.payment.service.SavePaymentService;
 import com.paymentPractice.payment.service.TransferAndGetStringDataService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final AmountRepository amountRepository;
     private final CardInformationConversionService cardInformationConversionService;
     private final TransferAndGetStringDataService transferAndGetStringDataService;
+    private final SavePaymentService savePaymentService;
 
     @Override
     @Transactional
@@ -34,29 +36,13 @@ public class PaymentServiceImpl implements PaymentService {
         cardInformationConversionService.getEncryptedCardInformation(paymentVO);
 
         // 데이터 저장
-        PaymentEntity paymentEntity = PaymentEntity.builder()
-                .userId(paymentVO.getUserId())
-                .paymentStatus(PaymentStatus.SUCCESS)
-                .cardInformation(paymentVO.getEncryptedCardInformation())
-                .installmentMonths(paymentVO.getInstallmentMonths())
-                .build();
-        paymentEntity.setPaymentInsertData();
-        paymentRepository.save(paymentEntity);
-        AmountEntity amountEntity = AmountEntity.builder()
-                .amount(paymentVO.getAmount())
-                .paymentEntity(paymentEntity)
-                .amountType(AmountType.PAYMENT)
-                .vat(paymentVO.getCalculatedVat())
-                .vatDefaultYn(paymentVO.getVatDefaultYn())
-                .build();
-        amountEntity.setAmountInsertData();
-        amountRepository.save(amountEntity);
+        String amountId = savePaymentService.savePaymentResult(paymentVO);
 
         // String data 생성 및 전송
-        String stringData = transferAndGetStringDataService.paymentSendingData(amountEntity.getAmountId(), paymentVO);
+        String stringData = transferAndGetStringDataService.paymentSendingData(amountId, paymentVO);
 
         return PaymentResultVO.builder()
-                .amountId(amountEntity.getAmountId())
+                .amountId(amountId)
                 .stringData(stringData).build();
     }
 
