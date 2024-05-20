@@ -23,7 +23,7 @@ public class SavePaymentServiceImpl implements SavePaymentService {
                 .cardInformation(paymentVO.getEncryptedCardInformation())
                 .installmentMonths(paymentVO.getInstallmentMonths())
                 .build();
-        paymentEntity.setPaymentInsertData();
+        paymentEntity.setPaymentDataBeforeInsert();
         paymentRepository.save(paymentEntity);
         AmountEntity amountEntity = AmountEntity.builder()
                 .amount(paymentVO.getAmount())
@@ -32,7 +32,7 @@ public class SavePaymentServiceImpl implements SavePaymentService {
                 .vat(paymentVO.getCalculatedVat())
                 .vatDefaultYn(paymentVO.getVatDefaultYn())
                 .build();
-        amountEntity.setAmountInsertData();
+        amountEntity.setAmountDataBeforeInsert();
         amountRepository.save(amountEntity);
 
         return amountEntity.getAmountId();
@@ -48,7 +48,7 @@ public class SavePaymentServiceImpl implements SavePaymentService {
                 .vat(paymentEntity.getRestVat())
                 .vatDefaultYn(YesOrNo.N)
                 .build();
-        cancelAmount.setAmountInsertData();
+        cancelAmount.setAmountDataBeforeInsert();
         amountRepository.save(cancelAmount);
         return cancelAmount.getAmountId();
     }
@@ -63,7 +63,7 @@ public class SavePaymentServiceImpl implements SavePaymentService {
                 .vat(partialCancellationVO.getCalculatedVat())
                 .vatDefaultYn(partialCancellationVO.getVatDefaultYn())
                 .build();
-        cancelAmount.setAmountInsertData();
+        cancelAmount.setAmountDataBeforeInsert();
         amountRepository.save(cancelAmount);
 
         paymentEntity.setPartialCancellation(partialCancellationVO);

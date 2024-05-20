@@ -32,14 +32,14 @@ public abstract class BaseEntity {
     @Column(length = 1)
     private YesOrNo deleteYn;
 
-    protected void setBaseInsertData(String userId) {
+    protected void setDefaultDataBeforeInsert(String userId) {
         this.lastModifiedId = userId;
         this.lastModifiedDate = LocalDateTime.now();
         this.creationId = userId;
         this.creationDate = LocalDateTime.now();
         this.deleteYn = YesOrNo.N;
     }
-    protected void setBaseModifiedData(String userId) {
+    protected void setDefaultDataBeforeUpdate(String userId) {
         this.lastModifiedId = userId;
         this.lastModifiedDate = LocalDateTime.now();
     }

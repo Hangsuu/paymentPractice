@@ -45,7 +45,12 @@ public class AmountEntity extends BaseEntity {
     private PaymentEntity paymentEntity;
 
     // ID 및 BaseEntity 정보 입력
-    public void setAmountInsertData() {
+    public void setAmountDataBeforeInsert() {
+        createAmountId();
+        // Base Entity 데이터 입력
+        setDefaultDataBeforeInsert(this.paymentEntity.getUserId());
+    }
+    private void createAmountId() {
         StringBuilder stringBuilder = new StringBuilder();
         // amount 테이블 식별 코드 입력 (2자리)
         stringBuilder.append(TableCode.AM);
@@ -57,9 +62,6 @@ public class AmountEntity extends BaseEntity {
         stringBuilder.append(UUID.randomUUID().toString().substring(0, 3));
 
         this.amountId = stringBuilder.toString();
-
-        // Base Entity 데이터 입력
-        setBaseInsertData(this.paymentEntity.getUserId());
     }
 
     public PaymentEntity getPaymentEntityWithCancellationCheck() {

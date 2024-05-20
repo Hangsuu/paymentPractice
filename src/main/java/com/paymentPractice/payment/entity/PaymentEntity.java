@@ -48,7 +48,11 @@ public class PaymentEntity extends BaseEntity {
     private Long version;
 
     // ID 및 BaseEntity 정보 입력
-    public void setPaymentInsertData() {
+    public void setPaymentDataBeforeInsert() {
+        createPaymentId();
+        setDefaultDataBeforeInsert(this.userId);
+    }
+    private void createPaymentId() {
         StringBuilder stringBuilder = new StringBuilder();
         // payment 테이블 식별 코드 입력 (2자리)
         stringBuilder.append(TableCode.PA);
@@ -60,7 +64,6 @@ public class PaymentEntity extends BaseEntity {
         stringBuilder.append(UUID.randomUUID().toString().substring(0, 3));
 
         this.paymentId = stringBuilder.toString();
-        setBaseInsertData(this.userId);
     }
 
     public int getRestAmount() {
@@ -93,7 +96,7 @@ public class PaymentEntity extends BaseEntity {
     public void setCancellation() {
         paymentStatus = PaymentStatus.CANCELLATION;
         installmentMonths = 0;
-        setBaseModifiedData(this.userId);
+        setDefaultDataBeforeUpdate(this.userId);
     }
 
     public void setPartialCancellation(PartialCancellationVO partialCancellationVO) {
@@ -104,6 +107,6 @@ public class PaymentEntity extends BaseEntity {
         } else {
             this.paymentStatus = PaymentStatus.PARTIAL_CANCELLATION;
         }
-        setBaseModifiedData(this.userId);
+        setDefaultDataBeforeUpdate(this.userId);
     }
 }
