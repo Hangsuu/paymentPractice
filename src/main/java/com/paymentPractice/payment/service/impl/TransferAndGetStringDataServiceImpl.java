@@ -44,7 +44,7 @@ public class TransferAndGetStringDataServiceImpl implements TransferAndGetString
 
     @Override
     public String paymentCancellationSendingData(String amountId, PaymentEntity paymentEntity) {
-        CardInformationVO cardInformationVO = cardInformationConversionService.getCardInformation(paymentEntity);
+        CardInformationVO cardInformationVO = cardInformationConversionService.getCardInformation(paymentEntity.getCardInformation());
 
         CommonHeaderVO header = CommonHeaderVO.builder()
                 .dataDivision(String.valueOf(AmountType.CANCEL))

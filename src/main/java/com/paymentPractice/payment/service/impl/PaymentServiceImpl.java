@@ -76,7 +76,7 @@ public class PaymentServiceImpl implements PaymentService {
         PaymentEntity paymentEntity = amountEntity.getPaymentEntity();
 
         // 카드정보 복호화 (카드번호/만료일자/cvc)
-        CardInformationVO cardInformation = cardInformationConversionService.getCardInformation(paymentEntity);
+        CardInformationVO cardInformation = cardInformationConversionService.getCardInformation(paymentEntity.getCardInformation());
 
         return PaymentInformationVO.builder()
                 .amountId(amountEntity.getAmountId())

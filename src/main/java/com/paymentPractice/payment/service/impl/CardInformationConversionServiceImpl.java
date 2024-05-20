@@ -28,9 +28,8 @@ public class CardInformationConversionServiceImpl implements CardInformationConv
     }
 
     @Override
-    public CardInformationVO getCardInformation(PaymentEntity paymentEntity) {
-        // 복호화 후 / 단위로 끊어 카드정보 반환
-        String decryptedCardInformation = twoWayEncryptionService.decrypt(paymentEntity.getCardInformation());
+    public CardInformationVO getCardInformation(String encryptedCardData) {
+        String decryptedCardInformation = twoWayEncryptionService.decrypt(encryptedCardData);
         String[] cardInformation = decryptedCardInformation.split("/");
         CardInformationVO cardInformationVO = CardInformationVO.builder()
                 .cardNumber(maskingCardNumber(cardInformation[0]))

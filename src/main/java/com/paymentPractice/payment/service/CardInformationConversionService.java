@@ -9,5 +9,5 @@ public interface CardInformationConversionService {
     // 카드정보 암호화
     void getEncryptedCardInformation(PaymentVO paymentVO);
     // 카드정보 복호화
-    CardInformationVO getCardInformation(PaymentEntity paymentEntity);
+    CardInformationVO getCardInformation(String encryptedCardData);
 }
