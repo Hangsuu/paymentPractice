@@ -31,12 +31,12 @@ public class CardInformationConversionServiceImpl implements CardInformationConv
     public CardInformationVO getCardInformation(PaymentEntity paymentEntity) {
         // 복호화 후 / 단위로 끊어 카드정보 반환
         String decryptedCardInformation = twoWayEncryptionService.decrypt(paymentEntity.getCardInformation());
-        String[] cardInformations = decryptedCardInformation.split("/");
-        CardInformationVO cardInformation = CardInformationVO.builder()
-                .cardNumber(maskingCardNumber(cardInformations[0]))
-                .expirationPeriod(cardInformations[1])
-                .cvc(cardInformations[2]).build();
-        return cardInformation;
+        String[] cardInformation = decryptedCardInformation.split("/");
+        CardInformationVO cardInformationVO = CardInformationVO.builder()
+                .cardNumber(maskingCardNumber(cardInformation[0]))
+                .expirationPeriod(cardInformation[1])
+                .cvc(cardInformation[2]).build();
+        return cardInformationVO;
     }
 
     private String maskingCardNumber(String cardNumber) {

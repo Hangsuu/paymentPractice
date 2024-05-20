@@ -49,11 +49,8 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     @MethodLog(description = "전체 취소 메서드")
     public PaymentResultVO paymentCancellation(PaymentCancellationSO paymentCancellationSO) {
-        // 올바른 amount id인지 판단 및 예외처리
-        AmountEntity amountEntity = getAmountEntityById(paymentCancellationSO.getAmountId());
-
         // 해당 결제 정보 반환
-        PaymentEntity paymentEntity = amountEntity.getPaymentEntityWithCancellationCheck();
+        PaymentEntity paymentEntity = getPaymentEntityByAmountId(paymentCancellationSO.getAmountId());
 
         // 금액 데이터 저장
         String cancelAmountId = savePaymentService.savePaymentCancellation(paymentEntity);
@@ -62,7 +59,7 @@ public class PaymentServiceImpl implements PaymentService {
         paymentEntity.setCancellation();
 
         // String data 생성 및 전송
-        String stringData = transferAndGetStringDataService.paymentCancellationSendingData(amountEntity.getAmountId(), paymentEntity);
+        String stringData = transferAndGetStringDataService.paymentCancellationSendingData(cancelAmountId, paymentEntity);
 
         return PaymentResultVO.builder()
                 .amountId(cancelAmountId)
@@ -98,11 +95,8 @@ public class PaymentServiceImpl implements PaymentService {
         // 부분취소 유효성 체크
         PartialCancellationVO partialCancellationVO = new PartialCancellationVO(partialCancellationSO);
 
-        // 올바른 amount id인지 판단 및 예외처리
-        AmountEntity amountEntity = getAmountEntityById(partialCancellationSO.getAmountId());
-
         // 해당 결제 정보 반환
-        PaymentEntity paymentEntity = amountEntity.getPaymentEntityWithCancellationCheck();
+        PaymentEntity paymentEntity = getPaymentEntityByAmountId(partialCancellationSO.getAmountId());
 
         // 취소 가능 여부 판단
         partialCancellationVO.partialCancellationAvailableCheck(paymentEntity.getRestAmount(), paymentEntity.getRestVat());
@@ -110,7 +104,7 @@ public class PaymentServiceImpl implements PaymentService {
         String cancelAmountId = savePaymentService.savePartialCancellation(partialCancellationVO, paymentEntity);
 
         // String data 생성 및 전송
-        String stringData = transferAndGetStringDataService.paymentCancellationSendingData(amountEntity.getAmountId(), paymentEntity);
+        String stringData = transferAndGetStringDataService.paymentCancellationSendingData(cancelAmountId, paymentEntity);
 
         return PaymentResultVO.builder()
                 .amountId(cancelAmountId)
@@ -118,6 +112,14 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     // 올바른 amount id인지 판단 및 예외처리
+    private PaymentEntity getPaymentEntityByAmountId(String amountId) {
+        AmountEntity amountEntity = amountRepository.findById(amountId)
+                .orElseThrow(() -> {
+                    throw new CustomException(ErrorCode.WRONG_AMOUNT_ID);
+                });
+        return amountEntity.getPaymentEntityWithCancellationCheck();
+    }
+
     private AmountEntity getAmountEntityById(String amountId) {
         AmountEntity amountEntity = amountRepository.findById(amountId)
                 .orElseThrow(() -> {
