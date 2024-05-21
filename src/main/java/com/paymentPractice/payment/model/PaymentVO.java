@@ -3,10 +3,12 @@ package com.paymentPractice.payment.model;
 import com.paymentPractice.payment.entity.YesOrNo;
 import com.paymentPractice.payment.service.impl.PaymentServiceImpl;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class PaymentVO extends CalculatedVatVO{
     public PaymentVO(PaymentSO so) {
         // 결제 유효성 체크
