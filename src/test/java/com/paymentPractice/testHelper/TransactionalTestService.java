@@ -30,7 +30,7 @@ public class TransactionalTestService {
     }
 
     @Transactional
-    public int getCancelInformationNumber(String amountId) {
+    public int getCancelAmountCount(String amountId) {
         Optional<AmountEntity> findById = amountRepository.findById(amountId);
         if(findById.isEmpty()) {
             return 0;
@@ -45,7 +45,38 @@ public class TransactionalTestService {
     }
 
     @Transactional
-    public int getPaymentNumberByUserId(String uuidUserId) {
+    public int getPaymentListSizeByUserId(String uuidUserId) {
         return paymentRepository.findAllByUserId(uuidUserId).size();
+    }
+
+    @Transactional
+    public int getCancelPaymentCount(String amountId) {
+        Optional<AmountEntity> findById = amountRepository.findById(amountId);
+        if(findById.isEmpty()) {
+            return 0;
+        }
+        AmountEntity amountEntity = findById.get();
+
+        Optional<PaymentEntity> paymentEntity = paymentRepository.findById(amountEntity.getPaymentEntity().getPaymentId());
+        if(paymentEntity.isEmpty()) {
+            return 0;
+        }
+        List<AmountEntity> amounts = paymentEntity.get().getAmounts();
+        return amounts.size();
+    }
+
+    @Transactional
+    public PaymentEntity getCancelPaymentEntity(String amountId) {
+        Optional<AmountEntity> findById = amountRepository.findById(amountId);
+        if(findById.isEmpty()) {
+            return null;
+        }
+        AmountEntity amountEntity = findById.get();
+
+        Optional<PaymentEntity> paymentEntity = paymentRepository.findById(amountEntity.getPaymentEntity().getPaymentId());
+        if(paymentEntity.isEmpty()) {
+            return null;
+        }
+        return paymentEntity.get();
     }
 }

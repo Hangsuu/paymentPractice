@@ -8,6 +8,7 @@ import com.paymentPractice.payment.repository.PaymentRepository;
 import com.paymentPractice.payment.service.SavePaymentService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @AllArgsConstructor
 @Service
@@ -16,6 +17,7 @@ public class SavePaymentServiceImpl implements SavePaymentService {
     private final AmountRepository amountRepository;
 
     @Override
+    @Transactional
     public String savePaymentResult(PaymentVO paymentVO) {
         PaymentEntity paymentEntity = PaymentEntity.builder()
                 .userId(paymentVO.getUserId())
@@ -39,6 +41,7 @@ public class SavePaymentServiceImpl implements SavePaymentService {
     }
 
     @Override
+    @Transactional
     public String savePaymentCancellation(PaymentEntity paymentEntity) {
         // 금액 데이터 저장
         AmountEntity cancelAmount = AmountEntity.builder()
@@ -54,6 +57,7 @@ public class SavePaymentServiceImpl implements SavePaymentService {
     }
 
     @Override
+    @Transactional
     public String savePartialCancellation(PartialCancellationVO partialCancellationVO, PaymentEntity paymentEntity) {
         // 금액 데이터 저장
         AmountEntity cancelAmount = AmountEntity.builder()

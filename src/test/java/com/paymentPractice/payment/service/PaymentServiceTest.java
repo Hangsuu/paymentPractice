@@ -46,7 +46,7 @@ public class PaymentServiceTest {
 
         paymentService.payment(paymentSO);
 
-        assertThat(transactionalTestService.getPaymentNumberByUserId(UUIDUserID)).isEqualTo(1);
+        assertThat(transactionalTestService.getPaymentListSizeByUserId(UUIDUserID)).isEqualTo(1);
     }
 
     @Test
@@ -82,7 +82,7 @@ public class PaymentServiceTest {
         }
 
         // 취소 n건 중 1건만 처리
-        int cancelInformationNumber = transactionalTestService.getCancelInformationNumber(rightPaymentResult.getAmountId());
+        int cancelInformationNumber = transactionalTestService.getCancelAmountCount(rightPaymentResult.getAmountId());
         assertThat(cancelInformationNumber).isEqualTo(1);
     }
     @Nested
@@ -193,7 +193,7 @@ public class PaymentServiceTest {
             thread.join();
         }
         // 취소 2건 중 1건만 처리
-        int cancelInformationNumber = transactionalTestService.getCancelInformationNumber(rightPaymentResult.getAmountId());
+        int cancelInformationNumber = transactionalTestService.getCancelAmountCount(rightPaymentResult.getAmountId());
         assertThat(cancelInformationNumber).isEqualTo(1);
     }
     @Nested

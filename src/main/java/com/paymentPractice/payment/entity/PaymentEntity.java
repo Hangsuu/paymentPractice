@@ -41,7 +41,7 @@ public class PaymentEntity extends BaseEntity {
     // 할부 개월수
     private int installmentMonths;
 
-    @OneToMany(mappedBy = "paymentEntity", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "paymentEntity", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<AmountEntity> amounts = new ArrayList<>();
 
     @Version

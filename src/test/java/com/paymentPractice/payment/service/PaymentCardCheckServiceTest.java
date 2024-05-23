@@ -74,6 +74,6 @@ public class PaymentCardCheckServiceTest {
         }
 
         // 1건만 처리 확인
-        assertThat(transactionalTestService.getPaymentNumberByUserId(UUIDUserID)).isEqualTo(1);
+        assertThat(transactionalTestService.getPaymentListSizeByUserId(UUIDUserID)).isEqualTo(1);
     }
 }
