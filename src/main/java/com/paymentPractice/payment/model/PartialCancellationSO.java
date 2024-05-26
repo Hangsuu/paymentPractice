@@ -15,7 +15,7 @@ public class PartialCancellationSO {
     // 취소 부가가치세
     private Integer vat;
 
-    public void partialCancellationValidationCheck() {
+    public void cancellationValidationCheck() {
         // 금액 범위
         if (this.amount < 100 || this.amount > 1000000000) {
             throw new CustomException(ErrorCode.WRONG_AMOUNT);
