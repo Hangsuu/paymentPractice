@@ -14,6 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -46,6 +47,71 @@ public class PaymentControllerTest {
                         .content(paymentJson)
         ).andExpect(status().isOk())
         .andDo(print());
+    }
 
+    @Test
+    void paymentCancellationTest() throws Exception {
+        String paymentJson = "{"
+                + "\"cardNumber\": \"1234123412341234\","
+                + "\"expirationPeriod\": \"1234\","
+                + "\"cvc\": \"123\","
+                + "\"installmentMonths\": \"12\","
+                + "\"amount\": 11000,"
+                + "\"vat\": 1000"
+                + "}";
+        mockMvc.perform(
+                post("/rest/payment")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(paymentJson)
+        ).andExpect(status().isOk())
+        .andDo(print());
+
+        String cancellationJson = "{" +
+                "\"amountId\": \"AM240320212655457350\"" +
+                "}";
+        mockMvc.perform(
+                        post("/rest/paymentCancellation")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(cancellationJson)
+                ).andExpect(status().isOk())
+                .andDo(print());
+    }
+
+    @Test
+    void paymentInformationTest() throws Exception {
+        mockMvc.perform(get("/rest/paymentInformation")
+                        .param("amountId", "AM240320212655457350"))
+                .andExpect(status().isOk())
+                .andDo(print());
+    }
+
+    @Test
+    void partialCancellationTest() throws Exception {
+        String paymentJson = "{"
+                + "\"cardNumber\": \"1234123412341234\","
+                + "\"expirationPeriod\": \"1234\","
+                + "\"cvc\": \"123\","
+                + "\"installmentMonths\": \"12\","
+                + "\"amount\": 11000,"
+                + "\"vat\": 1000"
+                + "}";
+        mockMvc.perform(
+                        post("/rest/payment")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(paymentJson)
+                ).andExpect(status().isOk())
+                .andDo(print());
+
+        String cancellationJson = "{" +
+                "\"amountId\" : \"AM2403162339292629c7\"," +
+                "\"amount\" : 90000," +
+                "\"vat\" : null" +
+                "}";
+        mockMvc.perform(
+                        post("/rest/partialCancellation")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(cancellationJson)
+                ).andExpect(status().isOk())
+                .andDo(print());
     }
 }
