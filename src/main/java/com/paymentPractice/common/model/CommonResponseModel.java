@@ -1,6 +1,7 @@
 package com.paymentPractice.common.model;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.util.HashMap;
@@ -8,6 +9,7 @@ import java.util.Map;
 
 @Data
 @ToString
+@NoArgsConstructor
 public class CommonResponseModel<T> {
     private boolean isSuccess;
     private String message;
