@@ -89,47 +89,11 @@ public class PaymentControllerTest {
                         .content(paymentJson)
         ).andExpect(status().isOk())
         .andDo(print());
-
-        // given
-        PaymentSO paymentSO = new PaymentSO();
-        paymentSO.setCardNumber("1234123412341234");
-        paymentSO.setExpirationPeriod("1234");
-        paymentSO.setCvc("123");
-        paymentSO.setInstallmentMonths(12);
-        paymentSO.setAmount(11000);
-        paymentSO.setVat(1000);
-
-        // when
-        HttpHeaders headers = new HttpHeaders();
-        HttpEntity<PaymentSO> entity = new HttpEntity<>(paymentSO, headers);
-        ResponseEntity<CommonResponseModel> response = restTemplate.exchange("/rest/payment", HttpMethod.POST, entity, CommonResponseModel.class);
-        log.info("response : {}", response);
     }
 
     @Test
     void paymentCancellationTest() throws Exception {
-        String paymentJson = "{"
-                + "\"cardNumber\": \"1234123412341234\","
-                + "\"expirationPeriod\": \"1234\","
-                + "\"cvc\": \"123\","
-                + "\"installmentMonths\": \"12\","
-                + "\"amount\": 11000,"
-                + "\"vat\": 1000"
-                + "}";
-        MvcResult mvcResult = mockMvc.perform(
-                        post("/rest/payment")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(paymentJson)
-                ).andExpect(status().isOk())
-                .andDo(print()).andReturn();
-        String responseBody = mvcResult.getResponse().getContentAsString();
-        CommonResponseModel paymentResponse = objectMapper.readValue(responseBody,
-                new TypeReference<CommonResponseModel<PaymentResultVO>>() {
-        });
-        PaymentResultVO paymentResultVO = (PaymentResultVO) paymentResponse.getData();
-        String amountId = paymentResultVO.getAmountId();
-
-        log.info("payed amount Id : {}", amountId);
+        String amountId = getDefaultAmountId();
 
         String cancellationJson = "{" +
                 "\"amountId\": \"" + amountId + "\"" +
@@ -144,32 +108,21 @@ public class PaymentControllerTest {
 
     @Test
     void paymentInformationTest() throws Exception {
+        String amountId = getDefaultAmountId();
+
         mockMvc.perform(get("/rest/paymentInformation")
-                        .param("amountId", "AM240320212655457350"))
+                        .param("amountId", amountId))
                 .andExpect(status().isOk())
                 .andDo(print());
     }
 
     @Test
     void partialCancellationTest() throws Exception {
-        String paymentJson = "{"
-                + "\"cardNumber\": \"1234123412341234\","
-                + "\"expirationPeriod\": \"1234\","
-                + "\"cvc\": \"123\","
-                + "\"installmentMonths\": \"12\","
-                + "\"amount\": 11000,"
-                + "\"vat\": 1000"
-                + "}";
-        mockMvc.perform(
-                        post("/rest/payment")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(paymentJson)
-                ).andExpect(status().isOk())
-                .andDo(print());
+        String amountId = getDefaultAmountId();
 
         String cancellationJson = "{" +
-                "\"amountId\" : \"AM2403162339292629c7\"," +
-                "\"amount\" : 90000," +
+                "\"amountId\" : \"" + amountId + "\"," +
+                "\"amount\" : 9000," +
                 "\"vat\" : null" +
                 "}";
         mockMvc.perform(
@@ -178,5 +131,32 @@ public class PaymentControllerTest {
                                 .content(cancellationJson)
                 ).andExpect(status().isOk())
                 .andDo(print());
+    }
+
+    private String getDefaultAmountId() throws Exception {
+        String paymentJson = "{"
+                + "\"cardNumber\": \"1234123412341234\","
+                + "\"expirationPeriod\": \"1234\","
+                + "\"cvc\": \"123\","
+                + "\"installmentMonths\": \"12\","
+                + "\"amount\": 11000,"
+                + "\"vat\": 1000"
+                + "}";
+        MvcResult mvcResult = mockMvc.perform(
+                        post("/rest/payment")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(paymentJson)
+                ).andExpect(status().isOk())
+                .andDo(print()).andReturn();
+
+        String responseBody = mvcResult.getResponse().getContentAsString();
+        CommonResponseModel paymentResponse = objectMapper.readValue(responseBody,
+                new TypeReference<CommonResponseModel<PaymentResultVO>>() {
+                });
+        PaymentResultVO paymentResultVO = (PaymentResultVO) paymentResponse.getData();
+        String amountId = paymentResultVO.getAmountId();
+
+        log.info("payed amount Id : {}", amountId);
+        return amountId;
     }
 }
