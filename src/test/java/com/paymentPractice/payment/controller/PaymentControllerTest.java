@@ -1,8 +1,11 @@
 package com.paymentPractice.payment.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paymentPractice.PaymentPracticeApplication;
 import com.paymentPractice.common.model.CommonResponseModel;
 import com.paymentPractice.common.service.TwoWayEncryptionService;
+import com.paymentPractice.payment.model.PaymentResultVO;
 import com.paymentPractice.payment.model.PaymentSO;
 import com.paymentPractice.payment.repository.AmountRepository;
 import com.paymentPractice.payment.repository.CardNumberRepository;
@@ -22,6 +25,8 @@ import org.springframework.http.*;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -40,6 +45,8 @@ public class PaymentControllerTest {
     private MockMvc mockMvc;
     @Autowired
     private TestRestTemplate restTemplate;
+    @Autowired
+    private ObjectMapper objectMapper;
     @Autowired
     private PaymentService paymentService; // 필요한 의존성 주입
     @Autowired
@@ -109,15 +116,23 @@ public class PaymentControllerTest {
                 + "\"amount\": 11000,"
                 + "\"vat\": 1000"
                 + "}";
-        mockMvc.perform(
-                post("/rest/payment")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(paymentJson)
-        ).andExpect(status().isOk())
-        .andDo(print());
+        MvcResult mvcResult = mockMvc.perform(
+                        post("/rest/payment")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(paymentJson)
+                ).andExpect(status().isOk())
+                .andDo(print()).andReturn();
+        String responseBody = mvcResult.getResponse().getContentAsString();
+        CommonResponseModel paymentResponse = objectMapper.readValue(responseBody,
+                new TypeReference<CommonResponseModel<PaymentResultVO>>() {
+        });
+        PaymentResultVO paymentResultVO = (PaymentResultVO) paymentResponse.getData();
+        String amountId = paymentResultVO.getAmountId();
+
+        log.info("payed amount Id : {}", amountId);
 
         String cancellationJson = "{" +
-                "\"amountId\": \"AM240320212655457350\"" +
+                "\"amountId\": \"" + amountId + "\"" +
                 "}";
         mockMvc.perform(
                         post("/rest/paymentCancellation")
