@@ -2,31 +2,23 @@ package com.paymentPractice.payment.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.paymentPractice.PaymentPracticeApplication;
 import com.paymentPractice.common.model.CommonResponseModel;
 import com.paymentPractice.common.service.TwoWayEncryptionService;
 import com.paymentPractice.payment.model.PaymentResultVO;
-import com.paymentPractice.payment.model.PaymentSO;
 import com.paymentPractice.payment.repository.AmountRepository;
 import com.paymentPractice.payment.repository.CardNumberRepository;
 import com.paymentPractice.payment.repository.PaymentRepository;
 import com.paymentPractice.payment.repository.TransferDataRepository;
 import com.paymentPractice.payment.service.*;
-import com.paymentPractice.testHelper.PaymentControllerConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.ResultActions;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -34,9 +26,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Slf4j
-//@RunWith(SpringRunner.class)
-//@WebMvcTest(PaymentController.class)
-//@ContextConfiguration(classes = {PaymentControllerConfig.class})
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 public class PaymentControllerTest {
